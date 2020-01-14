@@ -49,7 +49,7 @@ impl Trait for Test {}
 
 impl discounts::Trait for Test {}
 
-type Prices = Module<Test>;
+type ComplexPrices = Module<Test>;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -63,9 +63,9 @@ fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn calculate_price_succeeds() {
     new_test_ext().execute_with(|| {
-        Prices::store_price(1, 100);
+        ComplexPrices::store_price(1, 100, Some(5));
 
-        assert_eq!(Prices::calculate_price(1), 80);
+        assert_eq!(ComplexPrices::calculate_price(1), 95);
     });
 }
 
@@ -74,8 +74,8 @@ fn calculate_price_succeeds_with_mocks() {
     new_test_ext().execute_with(|| {
         <discounts::Module<Test>>::calculate_discount.mock_safe(move |_| MockResult::Return(10));
 
-        Prices::store_price(1, 100);
+        ComplexPrices::store_price(1, 100, None);
 
-        assert_eq!(Prices::calculate_price(1), 90);
+        assert_eq!(ComplexPrices::calculate_price(1), 90);
     });
 }

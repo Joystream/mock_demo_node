@@ -9,7 +9,7 @@ mod tests;
 pub trait Trait: system::Trait + discounts::Trait {}
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Prices {
+    trait Store for Module<T: Trait> as SimplePrices {
 
         PriceById get(get_base_price): map u32 => Option<u32>;
     }
