@@ -12,7 +12,7 @@ pub trait Trait: system::Trait {}
 decl_storage! {
     trait Store for Module<T: Trait> as Discounts {
 
-        DiscountByPrice get(get_discount): map u32 => Option<u32>;
+        DiscountByItemId get(get_discount): map u32 => Option<u32>;
     }
 }
 
@@ -23,21 +23,19 @@ decl_module! {
 
 #[cfg_attr(test, mockable)]
 impl<T: Trait> Module<T> {
-    pub fn store_custom_discount(price: u32, discount: u32) {
-        DiscountByPrice::insert(price, discount);
+    pub fn store_custom_discount(item_id: u32, discount: u32) {
+        DiscountByItemId::insert(item_id, discount);
     }
 
-    pub fn calculate_discount(base_price: u32) -> u32 {
-        let custom_discount = DiscountByPrice::get(base_price);
+    pub fn calculate_discount(item_id: u32, base_price: u32) -> u32 {
+        let custom_discount = DiscountByItemId::get(item_id);
 
         if let Some(discount) = custom_discount {
             discount
+        } else if base_price > 50 {
+            20
         } else {
-            if base_price > 50 {
-                20
-            } else {
-                0
-            }
+            0
         }
     }
 }

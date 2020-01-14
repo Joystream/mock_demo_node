@@ -72,7 +72,7 @@ fn calculate_price_succeeds() {
 #[test]
 fn calculate_price_succeeds_with_mocks() {
     new_test_ext().execute_with(|| {
-        <discounts::Module<Test>>::calculate_discount.mock_safe(move |_| MockResult::Return(10));
+        <discounts::Module<Test>>::calculate_discount.mock_safe(move |_, _| MockResult::Return(10));
 
         SimplePrices::store_price(1, 100);
 

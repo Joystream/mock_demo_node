@@ -59,7 +59,7 @@ fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn calculate_discount_succeeds() {
     new_test_ext().execute_with(|| {
-        assert_eq!(Discounts::calculate_discount(1), 0);
-        assert_eq!(Discounts::calculate_discount(100), 20);
+        assert_eq!(Discounts::calculate_discount(1, 1), 0);
+        assert_eq!(Discounts::calculate_discount(1, 100), 20);
     });
 }

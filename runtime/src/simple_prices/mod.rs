@@ -11,7 +11,7 @@ pub trait Trait: system::Trait + discounts::Trait {}
 decl_storage! {
     trait Store for Module<T: Trait> as SimplePrices {
 
-        PriceById get(get_base_price): map u32 => Option<u32>;
+        PriceByItemId get(get_base_price): map u32 => Option<u32>;
     }
 }
 
@@ -21,13 +21,13 @@ decl_module! {
 }
 
 impl<T: Trait> Module<T> {
-    pub fn store_price(id: u32, price: u32) {
-        PriceById::insert(id, price);
+    pub fn store_price(item_id: u32, price: u32) {
+        PriceByItemId::insert(item_id, price);
     }
-    pub fn calculate_price(id: u32) -> u32 {
-        let base_price = PriceById::get(id).unwrap();
+    pub fn calculate_price(item_id: u32) -> u32 {
+        let base_price = PriceByItemId::get(item_id).unwrap();
 
-        let discount = <discounts::Module<T>>::calculate_discount(base_price);
+        let discount = <discounts::Module<T>>::calculate_discount(item_id, base_price);
 
         base_price - discount
     }

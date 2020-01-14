@@ -74,16 +74,16 @@ fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
     ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
 }
 
-struct CustomDiscountProvider;
-impl DiscountProvider for CustomDiscountProvider {
-    fn store_custom_discount(&self, _price: u32, _discount: u32) {}
-    fn calculate_discount(&self, _base_price: u32) -> u32 {
-        50
-    }
-}
-
 #[test]
 fn calculate_price_succeeds_with_custom_discount_provider() {
+    struct CustomDiscountProvider;
+    impl DiscountProvider for CustomDiscountProvider {
+        fn store_custom_discount(&self, _price: u32, _discount: u32) {}
+        fn calculate_discount(&self, _item_id: u32, _base_price: u32) -> u32 {
+            50
+        }
+    }
+
     new_test_ext().execute_with(|| {
         let custom_mock = Rc::new(CustomDiscountProvider {});
         setup_discount_provider_mock(custom_mock);
