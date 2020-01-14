@@ -10,6 +10,8 @@ use sp_runtime::{
     Perbill,
 };
 
+use mocktopus::mocking::*;
+
 impl_outer_origin! {
     pub enum Origin for Test {}
 }
@@ -58,14 +60,22 @@ fn new_test_ext() -> sp_io::TestExternalities {
         .into()
 }
 
-
-
 #[test]
 fn calculate_price_succeeds() {
     new_test_ext().execute_with(|| {
+        Prices::store_price(1, 100);
+
+        assert_eq!(Prices::calculate_price(1), 80);
+    });
+}
+
+#[test]
+fn calculate_price_succeeds_with_mocks() {
+    new_test_ext().execute_with(|| {
+        <discounts::Module<Test>>::calculate_discount.mock_safe(move |_| MockResult::Return(10));
 
         Prices::store_price(1, 100);
 
-        assert_eq!(Prices::calculate_price(1) , 80 );
+        assert_eq!(Prices::calculate_price(1), 90);
     });
 }

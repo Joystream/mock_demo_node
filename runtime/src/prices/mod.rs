@@ -1,6 +1,8 @@
 use frame_support::{decl_module, decl_storage};
 
 use super::discounts;
+
+#[cfg(test)]
 mod tests;
 
 /// The module's configuration trait.
