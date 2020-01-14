@@ -11,6 +11,7 @@ use sp_runtime::{
 };
 
 use mocktopus::mocking::*;
+use sp_std::rc::Rc;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
@@ -69,13 +70,26 @@ fn calculate_price_succeeds() {
     });
 }
 
+fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
+    ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
+}
+
+struct CustomDiscountProvider;
+impl DiscountProvider for CustomDiscountProvider {
+    fn store_custom_discount(&self, _price: u32, _discount: u32) {}
+    fn calculate_discount(&self, _base_price: u32) -> u32 {
+        50
+    }
+}
+
 #[test]
-fn calculate_price_succeeds_with_mocks() {
+fn calculate_price_succeeds_with_custom_discount_provider() {
     new_test_ext().execute_with(|| {
-        <discounts::Module<Test>>::calculate_discount.mock_safe(move |_| MockResult::Return(10));
+        let custom_mock = Rc::new(CustomDiscountProvider {});
+        setup_discount_provider_mock(custom_mock);
 
         ComplexPrices::store_price(1, 100, None);
 
-        assert_eq!(ComplexPrices::calculate_price(1), 90);
+        assert_eq!(ComplexPrices::calculate_price(1), 50);
     });
 }

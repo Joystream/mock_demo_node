@@ -6,6 +6,9 @@ use sp_std::rc::Rc;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+use mocktopus::macros::*;
+
 /// The module's configuration trait.
 pub trait Trait: system::Trait + discounts::Trait {}
 
@@ -36,7 +39,10 @@ impl<T: Trait> Module<T> {
 
         base_price - discount
     }
+}
 
+#[cfg_attr(test, mockable)]
+impl<T: Trait> Module<T> {
     fn discounts() -> Rc<dyn DiscountProvider> {
         Rc::new(DefaultDiscountProvider::<T> {
             marker: PhantomData,
