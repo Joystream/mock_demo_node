@@ -61,7 +61,7 @@ pub trait DiscountProvider {
     fn calculate_discount(&self, item_id: u32, base_price: u32) -> u32;
 }
 
-struct DefaultDiscountProvider<T: Trait> {
+pub(crate) struct DefaultDiscountProvider<T: Trait> {
     marker: PhantomData<T>,
 }
 impl<T: Trait> DiscountProvider for DefaultDiscountProvider<T> {

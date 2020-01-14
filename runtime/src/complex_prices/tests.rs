@@ -11,7 +11,8 @@ use sp_runtime::{
 };
 
 use mocktopus::mocking::*;
-use sp_std::rc::Rc;
+use std::rc::Rc;
+use std::panic;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
@@ -61,6 +62,46 @@ fn new_test_ext() -> sp_io::TestExternalities {
         .into()
 }
 
+
+// Intercepts panic method
+// Returns: whether panic occurred
+fn panics<F: std::panic::RefUnwindSafe + Fn()>(could_panic_func: F) -> bool {
+    {
+        let default_hook = panic::take_hook();
+        panic::set_hook(Box::new(|info| {
+            println!("{}", info);
+        }));
+
+        // intercept panic
+        let result = panic::catch_unwind(|| could_panic_func());
+
+        //restore default behaviour
+        panic::set_hook(default_hook);
+
+        result.is_err()
+    }
+}
+
+// Tests mock expectation and restores default behaviour
+pub(crate) fn test_expectation_and_clear_mock() {
+    setup_discount_provider_mock(Rc::new(super::DefaultDiscountProvider {marker: PhantomData::<Test>{}}));
+}
+
+// Intercepts panic in provided function, test mock expectation and restores default behaviour
+pub(crate) fn handle_mock<F: std::panic::RefUnwindSafe + Fn()>(func: F) {
+    let panicked = panics(func);
+
+    test_expectation_and_clear_mock();
+
+    assert!(!panicked);
+}
+
+
+fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
+    ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
+}
+
+
 #[test]
 fn calculate_price_succeeds() {
     new_test_ext().execute_with(|| {
@@ -68,10 +109,6 @@ fn calculate_price_succeeds() {
 
         assert_eq!(ComplexPrices::calculate_price(1), 95);
     });
-}
-
-fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
-    ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
 }
 
 #[test]
@@ -91,5 +128,30 @@ fn calculate_price_succeeds_with_custom_discount_provider() {
         ComplexPrices::store_price(1, 100, None);
 
         assert_eq!(ComplexPrices::calculate_price(1), 50);
+    });
+}
+
+#[test]
+fn calculate_price_succeeds_with_feature_rich_mocks() {
+    handle_mock(|| {
+        new_test_ext().execute_with(|| {
+            let mock = {
+                let mut mock = super::MockDiscountProvider::new();
+                mock.expect_calculate_discount()
+                    .times(1)
+                    .returning(|_,_| 70);
+
+                mock.expect_store_custom_discount()
+                    .times(1)
+                    .returning(|_,_| ());
+
+                Rc::new(mock)
+            };
+            setup_discount_provider_mock(mock.clone());
+
+            ComplexPrices::store_price(1, 100, Some(70));
+
+            assert_eq!(ComplexPrices::calculate_price(1), 30);
+        })
     });
 }
