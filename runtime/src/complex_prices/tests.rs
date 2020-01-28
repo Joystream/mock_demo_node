@@ -11,8 +11,8 @@ use sp_runtime::{
 };
 
 use mocktopus::mocking::*;
-use std::rc::Rc;
 use std::panic;
+use std::rc::Rc;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
@@ -62,7 +62,6 @@ fn new_test_ext() -> sp_io::TestExternalities {
         .into()
 }
 
-
 // Intercepts panic method
 // Returns: whether panic occurred
 fn panics<F: std::panic::RefUnwindSafe + Fn()>(could_panic_func: F) -> bool {
@@ -84,7 +83,9 @@ fn panics<F: std::panic::RefUnwindSafe + Fn()>(could_panic_func: F) -> bool {
 
 // Tests mock expectation and restores default behaviour
 pub(crate) fn test_expectation_and_clear_mock() {
-    setup_discount_provider_mock(Rc::new(super::DefaultDiscountProvider {marker: PhantomData::<Test>{}}));
+    setup_discount_provider_mock(Rc::new(super::DefaultDiscountProvider {
+        marker: PhantomData::<Test> {},
+    }));
 }
 
 // Intercepts panic in provided function, test mock expectation and restores default behaviour
@@ -96,11 +97,9 @@ pub(crate) fn handle_mock<F: std::panic::RefUnwindSafe + Fn()>(func: F) {
     assert!(!panicked);
 }
 
-
 fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
     ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
 }
-
 
 #[test]
 fn calculate_price_succeeds() {
@@ -139,11 +138,11 @@ fn calculate_price_succeeds_with_feature_rich_mocks() {
                 let mut mock = super::MockDiscountProvider::new();
                 mock.expect_calculate_discount()
                     .times(1)
-                    .returning(|_,_| 70);
+                    .returning(|_, _| 70);
 
                 mock.expect_store_custom_discount()
                     .times(1)
-                    .returning(|_,_| ());
+                    .returning(|_, _| ());
 
                 Rc::new(mock)
             };
