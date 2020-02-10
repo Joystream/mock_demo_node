@@ -2,8 +2,7 @@
 
 This project demostrates how to use mocks with Parity Substrate modules. It contains 'toy' examples and aims to demontrate mocking techniques.
 
-Mocking frameworks:
-- [Mocktopus](https://docs.rs/mocktopus/0.7.5/mocktopus/)
+Mocking framework:
 - [Mockall](https://docs.rs/mockall/0.6.0/mockall/)
 
 ### Motivation
@@ -12,18 +11,16 @@ You can use mocks when you want to test modules independently. If module A is de
 
 ### Description
 
-Project contains three substrate modules and their tests:
+Project contains two substrate modules and their tests:
 
 - discounts
-- simple_prices
 - complex_prices
 
-Both **simple_prices** and **complex_prices** modules depend on **discounts** module in order to calculate price.
-
-### Simple_prices
-
-If you doesn't need complicated mock-scenarios you can use simpler mock solution: *mocktopus* framework conditionally compiled with dependent **discounts** module.
+**complex_prices** modules depend on **discounts** module in order to calculate price.
 
 ### Complex_prices
 
-If you need feature-rich mocks or stateful mocks you can create combined *moctopus* and *mockall* solution, with some additional abstraction-level when use dependent **discounts** module.
+If you need feature-rich mocks or stateful mocks you can create *mockall* solution, with some additional abstraction layers when use dependent **discounts** module.
+
+
+Simpler example - how to test the substrate module - you can find [here.](https://substrate.dev/recipes/testing/externalities.html)
