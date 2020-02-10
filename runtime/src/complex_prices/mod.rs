@@ -44,17 +44,6 @@ impl<T: Trait> Module<T> {
         base_price - discount
     }
 }
-pub trait DiscountHandlerProvider {
-    fn discounts() -> Rc<dyn DiscountHandler>;
-}
-
-impl<T: Trait> DiscountHandlerProvider for Module<T> {
-    fn discounts() -> Rc<dyn DiscountHandler> {
-        Rc::new(DefaultDiscountHandler::<T> {
-            marker: PhantomData,
-        })
-    }
-}
 
 #[cfg_attr(test, automock)]
 pub trait DiscountHandler {
@@ -73,5 +62,17 @@ impl<T: Trait> DiscountHandler for DefaultDiscountHandler<T> {
 
     fn calculate_discount(&self, item_id: u32, base_price: u32) -> u32 {
         <discounts::Module<T>>::calculate_discount(item_id, base_price)
+    }
+}
+
+pub trait DiscountHandlerProvider {
+    fn discounts() -> Rc<dyn DiscountHandler>;
+}
+
+impl<T: Trait> DiscountHandlerProvider for Module<T> {
+    fn discounts() -> Rc<dyn DiscountHandler> {
+        Rc::new(DefaultDiscountHandler::<T> {
+            marker: PhantomData,
+        })
     }
 }
