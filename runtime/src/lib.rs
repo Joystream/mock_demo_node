@@ -63,7 +63,6 @@ pub type DigestItem = generic::DigestItem<Hash>;
 
 mod complex_prices;
 mod discounts;
-mod simple_prices;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -234,8 +233,9 @@ impl sudo::Trait for Runtime {
     type Proposal = Call;
 }
 
-impl simple_prices::Trait for Runtime {}
-impl complex_prices::Trait for Runtime {}
+impl complex_prices::Trait for Runtime {
+    type DiscountHandlerProvider = complex_prices::Module<Runtime>;
+}
 impl discounts::Trait for Runtime {}
 
 construct_runtime!(
@@ -254,7 +254,6 @@ construct_runtime!(
 		Sudo: sudo,
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 
-		SimplePrices: simple_prices::{Module, Call, Storage},
 		ComplexPrices: complex_prices::{Module, Call, Storage},
 	}
 );

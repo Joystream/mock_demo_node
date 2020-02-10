@@ -10,7 +10,7 @@ use sp_runtime::{
     Perbill,
 };
 
-use mocktopus::mocking::*;
+use std::cell::RefCell;
 use std::panic;
 use std::rc::Rc;
 
@@ -47,7 +47,9 @@ impl system::Trait for Test {
     type Version = ();
     type ModuleToIndex = ();
 }
-impl Trait for Test {}
+impl Trait for Test {
+    type DiscountHandlerProvider = TestDiscountProvider;
+}
 
 impl discounts::Trait for Test {}
 
@@ -81,9 +83,33 @@ fn panics<F: std::panic::RefUnwindSafe + Fn()>(could_panic_func: F) -> bool {
     }
 }
 
+pub struct TestDiscountProvider;
+impl super::DiscountHandlerProvider for TestDiscountProvider {
+    /// Returns StakeHandler. Mock entry point for stake module.
+    fn discounts() -> Rc<dyn super::DiscountHandler> {
+        THREAD_LOCAL_DISCOUNT_PROVIDER.with(|f| f.borrow().clone())
+    }
+}
+
+// 1. RefCell - thread_local! mutation pattern
+// 2. Rc - ability to have multiple references
+thread_local! {
+    pub static THREAD_LOCAL_DISCOUNT_PROVIDER:
+      RefCell<Rc<dyn super::DiscountHandler>> = RefCell::new(Rc::new(super::DefaultDiscountHandler{
+        marker: PhantomData::<Test> {},
+    }));
+}
+
+// Sets stake handler implementation in hiring module. Mockall frameworks integration
+pub(crate) fn setup_discount_provider_mock(mock: Rc<dyn super::DiscountHandler>) {
+    THREAD_LOCAL_DISCOUNT_PROVIDER.with(|f| {
+        *f.borrow_mut() = mock.clone();
+    });
+}
+
 // Tests mock expectation and restores default behaviour
 pub(crate) fn test_expectation_and_clear_mock() {
-    setup_discount_provider_mock(Rc::new(super::DefaultDiscountProvider {
+    setup_discount_provider_mock(Rc::new(super::DefaultDiscountHandler {
         marker: PhantomData::<Test> {},
     }));
 }
@@ -97,10 +123,6 @@ pub(crate) fn handle_mock<F: std::panic::RefUnwindSafe + Fn()>(func: F) {
     assert!(!panicked);
 }
 
-fn setup_discount_provider_mock(mock: Rc<dyn DiscountProvider>) {
-    ComplexPrices::discounts.mock_safe(move || MockResult::Return(mock.clone()));
-}
-
 #[test]
 fn calculate_price_succeeds() {
     new_test_ext().execute_with(|| {
@@ -112,8 +134,8 @@ fn calculate_price_succeeds() {
 
 #[test]
 fn calculate_price_succeeds_with_custom_discount_provider() {
-    struct CustomDiscountProvider;
-    impl DiscountProvider for CustomDiscountProvider {
+    struct CustomDiscountHandler;
+    impl DiscountHandler for CustomDiscountHandler {
         fn store_custom_discount(&self, _price: u32, _discount: u32) {}
         fn calculate_discount(&self, _item_id: u32, _base_price: u32) -> u32 {
             50
@@ -121,7 +143,7 @@ fn calculate_price_succeeds_with_custom_discount_provider() {
     }
 
     new_test_ext().execute_with(|| {
-        let custom_mock = Rc::new(CustomDiscountProvider {});
+        let custom_mock = Rc::new(CustomDiscountHandler {});
         setup_discount_provider_mock(custom_mock);
 
         ComplexPrices::store_price(1, 100, None);
@@ -135,7 +157,7 @@ fn calculate_price_succeeds_with_feature_rich_mocks() {
     handle_mock(|| {
         new_test_ext().execute_with(|| {
             let mock = {
-                let mut mock = super::MockDiscountProvider::new();
+                let mut mock = super::MockDiscountHandler::new();
                 mock.expect_calculate_discount()
                     .times(1)
                     .returning(|_, _| 70);

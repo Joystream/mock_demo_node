@@ -7,15 +7,14 @@ use sp_std::rc::Rc;
 mod tests;
 
 #[cfg(test)]
-use mocktopus::macros::*;
-
-#[cfg(test)]
 use mockall::predicate::*;
 #[cfg(test)]
 use mockall::*;
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait + discounts::Trait {}
+pub trait Trait: system::Trait + discounts::Trait {
+    type DiscountHandlerProvider: DiscountHandlerProvider;
+}
 
 decl_storage! {
     trait Store for Module<T: Trait> as ComplexPrices {
@@ -33,38 +32,41 @@ impl<T: Trait> Module<T> {
         PriceByItemId::insert(item_id, price);
 
         if let Some(discount) = custom_discount {
-            Self::discounts().store_custom_discount(item_id, discount);
+            T::DiscountHandlerProvider::discounts().store_custom_discount(item_id, discount);
         }
     }
     pub fn calculate_price(item_id: u32) -> u32 {
         let base_price = PriceByItemId::get(item_id).unwrap();
 
-        let discount = Self::discounts().calculate_discount(item_id, base_price);
+        let discount =
+            T::DiscountHandlerProvider::discounts().calculate_discount(item_id, base_price);
 
         base_price - discount
     }
 }
+pub trait DiscountHandlerProvider {
+    fn discounts() -> Rc<dyn DiscountHandler>;
+}
 
-#[cfg_attr(test, mockable)]
-impl<T: Trait> Module<T> {
-    fn discounts() -> Rc<dyn DiscountProvider> {
-        Rc::new(DefaultDiscountProvider::<T> {
+impl<T: Trait> DiscountHandlerProvider for Module<T> {
+    fn discounts() -> Rc<dyn DiscountHandler> {
+        Rc::new(DefaultDiscountHandler::<T> {
             marker: PhantomData,
         })
     }
 }
 
 #[cfg_attr(test, automock)]
-pub trait DiscountProvider {
+pub trait DiscountHandler {
     fn store_custom_discount(&self, item_id: u32, discount: u32);
 
     fn calculate_discount(&self, item_id: u32, base_price: u32) -> u32;
 }
 
-pub(crate) struct DefaultDiscountProvider<T: Trait> {
+pub(crate) struct DefaultDiscountHandler<T: Trait> {
     marker: PhantomData<T>,
 }
-impl<T: Trait> DiscountProvider for DefaultDiscountProvider<T> {
+impl<T: Trait> DiscountHandler for DefaultDiscountHandler<T> {
     fn store_custom_discount(&self, item_id: u32, discount: u32) {
         <discounts::Module<T>>::store_custom_discount(item_id, discount);
     }

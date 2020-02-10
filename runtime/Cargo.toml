@@ -202,5 +202,4 @@ rev = '3e651110aa06aa835790df63410a29676243fc54'
 version = '1.0.4'
 
 [dev-dependencies]
-mocktopus =  "0.7.0"
 mockall = "0.6.0"

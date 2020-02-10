@@ -1,9 +1,6 @@
 use frame_support::{decl_module, decl_storage};
 
 #[cfg(test)]
-use mocktopus::macros::*;
-
-#[cfg(test)]
 mod tests;
 
 /// The module's configuration trait.
@@ -21,7 +18,6 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {}
 }
 
-#[cfg_attr(test, mockable)]
 impl<T: Trait> Module<T> {
     pub fn store_custom_discount(item_id: u32, discount: u32) {
         DiscountByItemId::insert(item_id, discount);

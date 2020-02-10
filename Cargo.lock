@@ -2338,24 +2338,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mocktopus"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "mocktopus_macros 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "mocktopus_macros"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "proc-macro2 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.13 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "multistream-select"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2440,7 +2422,6 @@ dependencies = [
  "frame-support 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "frame-system 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "mockall 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "mocktopus 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "pallet-aura 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "pallet-balances 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "pallet-grandpa 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
@@ -6000,8 +5981,6 @@ dependencies = [
 "checksum miow 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1f2f3b1cf331de6896aabf6e9d55dca90356cc9960cca7eaaf408a355ae919"
 "checksum mockall 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b95a7e7cfbce0e99ebbf5356a085d3b5e320a7ef300f77cd50a7148aa362e7c2"
 "checksum mockall_derive 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d5a615a1ad92048ad5d9633251edb7492b8abc057d7a679a9898476aef173935"
-"checksum mocktopus 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)" = "6bb802d95931d1426546328523487423c2bd44e0fca457d4ac063ec3150a681f"
-"checksum mocktopus_macros 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)" = "757ebe7dc317c368dba9dcc319266416e48272292ed86814478f66308119c2e9"
 "checksum multistream-select 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "fc3ef54aab1b2e37e911bcb99e376dbe4c1e0710afcdb8428608e4f993b39c47"
 "checksum names 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ef320dab323286b50fb5cdda23f61c796a72a89998ab565ca32525c5c556f2da"
 "checksum net2 0.2.33 (registry+https://github.com/rust-lang/crates.io-index)" = "42550d9fb7b6684a6d404d9fa7250c2eb2646df731d1c06afc06dcee9e1bcf88"
